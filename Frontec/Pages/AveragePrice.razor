@@ -1,0 +1,38 @@
+﻿@using Frontec.Models;
+@page "/average-price"
+@inject HttpClient Http
+
+<h3>Средняя цена по товарным группам в магазинах</h3>
+
+@if (stat is null)
+{
+    <p><em>Загрузка...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Магазин</th>
+                <th>Группа</th>
+                <th>Средняя цена</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>@stat.StoreName</td>
+                <td>@stat.GroupName</td>
+                <td>@stat.AveragePrice.ToString("N2")</td>
+            </tr>
+        </tbody>
+    </table>
+}
+
+@code {
+    List<AvgPriceStatDto>? stats;
+
+    protected override async Task OnInitializedAsync()
+    {
+        stats = await Http.GetFromJsonAsync<List<AvgPriceStatDto>>("api/stats/avg-prices");
+    }
+}

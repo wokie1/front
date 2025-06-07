@@ -1,0 +1,28 @@
+﻿@using Frontec.Models;
+@page "/expired-products"
+@inject HttpClient Http
+
+<h3>Просроченные товары</h3>
+
+@if (products is null)
+{
+    <p><em>Загрузка...</em></p>
+}
+else
+{
+    <ul>
+        @foreach (var p in products)
+        {
+            <li>@p.Name — @p.ExpirationDate.ToShortDateString() — @p.StoreName</li>
+        }
+    </ul>
+}
+
+@code {
+    List<ExpiredProductDto>? products;
+
+    protected override async Task OnInitializedAsync()
+    {
+        products = await Http.GetFromJsonAsync<List<ExpiredProductDto>>("http://localhost:5041/api/products/expired");
+    }
+}

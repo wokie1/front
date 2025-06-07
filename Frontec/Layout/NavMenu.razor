@@ -1,0 +1,47 @@
+﻿<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="">Frontec</a>
+        <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+</div>
+
+<div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
+    <nav class="flex-column">
+        <div class="nav-item px-3">
+            <NavLink href="" Match="NavLinkMatch.All">
+                <span class="oi oi-home" aria-hidden="true"></span> Главная
+            </NavLink>
+            <NavLink href="products-in-store">
+                <span class="oi oi-list" aria-hidden="true"></span> Товары в магазине
+            </NavLink>
+            <NavLink href="stores-with-product">
+                <span class="oi oi-map-marker" aria-hidden="true"></span> Где есть товар
+            </NavLink>
+            <NavLink href="average-price">
+                <span class="oi oi-bar-chart" aria-hidden="true"></span> Средняя цена по группам
+            </NavLink>
+            <NavLink href="top-sales">
+                <span class="oi oi-star" aria-hidden="true"></span> Топ 5 покупок
+            </NavLink>
+            <NavLink href="expired-products">
+                <span class="oi oi-warning" aria-hidden="true"></span> Просроченные товары
+            </NavLink>
+            <NavLink href="stores-over-threshold">
+                <span class="oi oi-credit-card" aria-hidden="true"></span> Магазины по выручке
+            </NavLink>
+        </div>
+    </nav>
+</div>
+
+@code {
+    private bool collapseNavMenu = true;
+
+    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+    private void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
+}

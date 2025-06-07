@@ -1,0 +1,28 @@
+﻿@using Frontec.Models;
+@page "/top-sales"
+@inject HttpClient Http
+
+<h3>Топ 5 продаж</h3>
+
+@if (sales is null)
+{
+    <p><em>Загрузка...</em></p>
+}
+else
+{
+    <ol>
+        @foreach (var s in sales)
+        {
+            <li>@s.CustomerName — @s.TotalAmount руб.</li>
+        }
+    </ol>
+}
+
+@code {
+    List<TopSaleDto>? sales;
+
+    protected override async Task OnInitializedAsync()
+    {
+        sales = await Http.GetFromJsonAsync<List<TopSaleDto>>("http://localhost:5041/api/stats/top-sales");
+    }
+}

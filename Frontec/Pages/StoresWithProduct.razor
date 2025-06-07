@@ -1,0 +1,43 @@
+﻿@using Frontec.Models;
+@page "/stores-with-product"
+@inject HttpClient Http
+
+<h3>Магазины с выбранным товаром</h3>
+
+<select @onchange="LoadStores">
+    <option disabled selected>Выберите товар</option>
+    @foreach (var product in allProducts)
+    {
+        <option value="@product.Id">@product.Name</option>
+    }
+</select>
+
+@if (stores is null)
+{
+    <p><em>Загрузка...</em></p>
+}
+else
+{
+    <ul>
+        @foreach (var s in stores)
+        {
+            <li>@s.Name</li>
+        }
+    </ul>
+}
+
+@code {
+    int productId;
+    List<StoreDto>? stores;
+    List<ProductDto> allProducts = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        allProducts = await Http.GetFromJsonAsync<List<ProductDto>>("http://localhost:5041/api/products");
+    }
+
+    async Task LoadStores(ChangeEventArgs e)
+    {
+        stores = await Http.GetFromJsonAsync<List<StoreDto>>($"https://localhost:5041/api/products/{productId}/stores");
+    }
+}
