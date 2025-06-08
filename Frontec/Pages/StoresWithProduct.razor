@@ -38,6 +38,6 @@ else
 
     async Task LoadStores(ChangeEventArgs e)
     {
-        stores = await Http.GetFromJsonAsync<List<StoreDto>>($"https://localhost:5041/api/products/{productId}/stores");
+        stores = await Http.GetFromJsonAsync<List<StoreDto>>($"http://localhost:5041/api/products/{productId}/stores");
     }
 }

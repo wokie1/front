@@ -1,10 +1,10 @@
-﻿@using Frontec.Models;
-@page "/average-price"
+﻿@page "/average-price"
+@using Frontec.Models
 @inject HttpClient Http
 
 <h3>Средняя цена по товарным группам в магазинах</h3>
 
-@if (stat is null)
+@if (stats is null)
 {
     <p><em>Загрузка...</em></p>
 }
@@ -19,20 +19,44 @@ else
             </tr>
         </thead>
         <tbody>
-            <tr>
-                <td>@stat.StoreName</td>
-                <td>@stat.GroupName</td>
-                <td>@stat.AveragePrice.ToString("N2")</td>
-            </tr>
+            @foreach (var item in stats)
+            {
+                <tr>
+                    <td>@item.StoreName</td>
+                    <td>@item.GroupName</td>
+                    <td>@item.AveragePrice.ToString("N2")</td>
+                </tr>
+            }
         </tbody>
     </table>
 }
 
 @code {
-    List<AvgPriceStatDto>? stats;
+    // Внутренний DTO для получения данных с API
+    public class ApiAvgPriceResponse
+    {
+        public int groupCode { get; set; }
+        public decimal avgPrice { get; set; }
+    }
+
+    private List<AvgPriceStatDto>? stats;
 
     protected override async Task OnInitializedAsync()
     {
-        stats = await Http.GetFromJsonAsync<List<AvgPriceStatDto>>("api/stats/avg-prices");
+        try
+        {
+            var apiResponse = await Http.GetFromJsonAsync<List<ApiAvgPriceResponse>>("api/stats/avg-prices");
+
+            stats = apiResponse?.Select(x => new AvgPriceStatDto
+            {
+                StoreName = "Основной магазин", 
+                GroupName = $"Группа {x.groupCode}",
+                AveragePrice = x.avgPrice
+            }).ToList();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Ошибка при загрузке данных: {ex.Message}");
+        }
     }
 }
