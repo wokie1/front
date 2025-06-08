@@ -1,5 +1,9 @@
 ﻿namespace Frontec.Models
 {
+    /// <summary>
+     /// DTO для отображения средней цены по товарной группе в магазине на клиенте.
+     /// Используется в компоненте AveragePrice.razor.
+     /// </summary> 
     public class AvgPriceStatDto
     {
         public int GroupCode { get; set; }

@@ -1,43 +1,90 @@
-﻿@using Frontec.Models;
-@page "/products-in-store"
+﻿@using Frontec.Models
+@page "/store-products"
 @inject HttpClient Http
+<summary>
+    Компонент страницы "Товаров в магазинах".
+    Загружает данные с backend API (api/stores), преобразует их в DTO,
+    и отображает в виде таблицы.
+</summary>
+<h3>Выбор магазина</h3>
 
-<h3>Товары в магазине</h3>
-
-<select @onchange="LoadProducts">
-    <option disabled selected>Выберите магазин</option>
+<select @bind="selectedStoreId" @onchange="HandleStoreChange">
+    <option value="0" disabled selected>Выберите магазин</option>
     @foreach (var store in stores)
     {
         <option value="@store.Id">@store.Name</option>
     }
 </select>
-
-@if (products is null)
-{
-    <p><em>Загрузка...</em></p>
-}
-else
-{
-    <ul>
-        @foreach (var p in products)
-        {
-            <li>@p.Name — @p.Price руб.</li>
-        }
-    </ul>
-}
-
 @code {
-    int storeId;
-    List<ProductDto>? products;
-    List<StoreDto> stores = new();
+    private int selectedStoreId = 0;
+    private List<StoreDto> stores = new();
+    private List<ProductDto>? products;
+    private StoreDto? currentStore;
+    private bool storesLoading = true;
+    private bool storeLoading = false;
+    private bool productsLoading = false;
+    private string? errorMessage;
 
     protected override async Task OnInitializedAsync()
     {
-        stores = await Http.GetFromJsonAsync<List<StoreDto>>("http://localhost:5041/api/stores");
+        try
+        {
+        
+            stores = await Http.GetFromJsonAsync<List<StoreDto>>("http://localhost:5041/api/stores") 
+                   ?? new List<StoreDto>();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Ошибка загрузки магазинов: {ex.Message}";
+        }
+        finally
+        {
+            storesLoading = false;
+        }
     }
 
-    async Task LoadProducts(ChangeEventArgs e)
+    private async Task HandleStoreChange(ChangeEventArgs e)
     {
-        products = await Http.GetFromJsonAsync<List<ProductDto>>($"http://localhost:5041/api/stores/{storeId}/products");
+        if (int.TryParse(e.Value?.ToString(), out var storeId))
+        {
+            selectedStoreId = storeId;
+            await LoadStoreData();
+        }
+    }
+
+    private async Task LoadStoreData()
+    {
+        if (selectedStoreId > 0)
+        {
+            storeLoading = true;
+            productsLoading = true;
+            errorMessage = null;
+            
+            try
+            {
+                // Загружаем информацию о магазине
+                currentStore = await Http.GetFromJsonAsync<StoreDto>(
+                    $"http://localhost:5041/api/stores/{selectedStoreId}");
+                
+                // Загружаем все товары
+                products = await Http.GetFromJsonAsync<List<ProductDto>>(
+                    "http://localhost:5041/api/products");
+                
+                // Фильтруем товары по магазину
+                if (products != null)
+                {
+                    products = products.Where(p => p.StoreId == selectedStoreId).ToList();
+                }
+            }
+            catch (Exception ex)
+            {
+                errorMessage = $"Ошибка загрузки данных: {ex.Message}";
+            }
+            finally
+            {
+                storeLoading = false;
+                productsLoading = false;
+            }
+        }
     }
 }

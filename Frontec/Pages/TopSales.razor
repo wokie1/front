@@ -1,7 +1,11 @@
 ﻿@using Frontec.Models;
 @page "/top-sales"
 @inject HttpClient Http
-
+<summary>
+    Компонент страницы "Лучшие продажи".
+    Загружает данные с backend API (api/stats/top-sales), преобразует их в DTO,
+    и отображает в виде таблицы.
+</summary>
 <h3>Топ 5 продаж</h3>
 
 @if (sales is null)

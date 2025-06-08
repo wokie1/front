@@ -1,5 +1,9 @@
 using Frontec.Models;
 
+/// <summary>
+/// DTO для десериализации ответа API: api/stats/avg-prices.
+/// Используется только внутри компонента, преобразуется в AvgPriceStatDto.
+/// </summary>
 public class ApiAvgPriceResponse
 {
     public int groupCode { get; set; }

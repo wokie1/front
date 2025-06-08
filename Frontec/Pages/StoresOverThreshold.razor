@@ -1,7 +1,11 @@
 ﻿@using Frontec.Models;
 @page "/stores-over-threshold"
 @inject HttpClient Http
-
+<summary>
+    Компонент страницы "Магазины отсортированные по выручке".
+    Загружает данные с backend API (api/products/expired), преобразует их в DTO,
+    и отображает в виде таблицы.
+</summary>
 <h3>магазины по выручке</h3>
 
 @if (products is null)

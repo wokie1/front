@@ -1,7 +1,11 @@
 ﻿@using Frontec.Models;
 @page "/stores-with-product"
 @inject HttpClient Http
-
+<summary>
+    Компонент страницы "Магазины с товаром".
+    Загружает данные с backend API (api/products), преобразует их в DTO,
+    и отображает в виде таблицы.
+</summary>
 <h3>Магазины с выбранным товаром</h3>
 
 <select @onchange="LoadStores">

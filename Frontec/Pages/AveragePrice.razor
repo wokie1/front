@@ -1,7 +1,11 @@
 ﻿@page "/average-price"
 @using Frontec.Models
 @inject HttpClient Http
-
+<summary>
+    Компонент страницы "Средняя цена по товарным группам".
+    Загружает данные с backend API (api/stats/avg-prices), преобразует их в DTO,
+    и отображает в виде таблицы.
+</summary>
 <h3>Средняя цена по товарным группам в магазинах</h3>
 
 @if (stats is null)

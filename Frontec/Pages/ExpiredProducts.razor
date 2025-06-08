@@ -1,28 +1,113 @@
 ﻿@using Frontec.Models;
-@page "/expired"
+@page "/expired-products"
 @inject HttpClient Http
-
+<summary>
+    Компонент страницы "Просроченные товары".
+    Загружает данные с backend API (api/products/expired), преобразует их в DTO,
+    и отображает в виде таблицы.
+</summary>
 <h3>Просроченные товары</h3>
 
-@if (products is null)
+@if (isLoading)
 {
-    <p><em>Загрузка...</em></p>
+    <div class="loading-message">
+        <p>Загрузка данных о просроченных товарах...</p>
+    </div>
+}
+else if (errorMessage != null)
+{
+    <div class="error-message">
+        <p>Ошибка: @errorMessage</p>
+        <p>Попробуйте обновить страницу или повторить попытку позже.</p>
+    </div>
+}
+else if (products == null || !products.Any())
+{
+    <div class="no-data-message">
+        <p>Просроченных товаров не найдено</p>
+    </div>
 }
 else
 {
-    <ul>
-        @foreach (var p in products)
-        {
-            <li>@p.Name — @p.ExpirationDate.ToShortDateString() — @p.StoreName</li>
-        }
-    </ul>
+    <div class="products-table">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Название</th>
+                    <th>Штрих-код</th>
+                    <th>Цена</th>
+                    <th>Срок годности</th>
+                    <th>Статус</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var product in products)
+                {
+                    <tr>
+                        <td>@product.Name</td>
+                        <td>@product.Barcode</td>
+                        <td>@product.Price.ToString("N2") руб.</td>
+                        <td class="@(IsSeverelyExpired(product.ExpiryDate) ? "text-danger" : "text-warning")">
+                            @product.ExpiryDate.ToShortDateString()
+                        </td>
+                        <td>
+                            @if (IsSeverelyExpired(product.ExpiryDate))
+                            {
+                                <span class="badge bg-danger">Сильно просрочен</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-warning">Просрочен</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
 }
 
 @code {
-    List<ExpiredProductDto>? products;
+    private List<ProductDto>? products;
+    private bool isLoading = true;
+    private string? errorMessage;
 
     protected override async Task OnInitializedAsync()
     {
-        products = await Http.GetFromJsonAsync<List<ExpiredProductDto>>("http://localhost:5041/api/products/expired");
+        try
+        {
+            // Используем правильный URL из вашего примера
+            var response = await Http.GetAsync("http://localhost:5041/api/products/expired");
+            
+            if (response.IsSuccessStatusCode)
+            {
+                products = await response.Content.ReadFromJsonAsync<List<ProductDto>>();
+            }
+            else
+            {
+                errorMessage = $"Ошибка сервера: {response.StatusCode}";
+                if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+                {
+                    errorMessage = "API endpoint не найден. Проверьте URL адрес.";
+                }
+            }
+        }
+        catch (HttpRequestException httpEx)
+        {
+            errorMessage = $"Ошибка подключения: {httpEx.Message}";
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Произошла ошибка: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private bool IsSeverelyExpired(DateTime expiryDate)
+    {
+        return expiryDate < DateTime.Now.AddDays(-7);
     }
 }
