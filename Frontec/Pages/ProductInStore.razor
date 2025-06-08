@@ -1,5 +1,5 @@
 ﻿@using Frontec.Models
-@page "/store-products"
+@page "/products-in-store"
 @inject HttpClient Http
 <summary>
     Компонент страницы "Товаров в магазинах".
@@ -8,13 +8,28 @@
 </summary>
 <h3>Выбор магазина</h3>
 
-<select @bind="selectedStoreId" @onchange="HandleStoreChange">
+<select @onchange="HandleStoreChange">
     <option value="0" disabled selected>Выберите магазин</option>
     @foreach (var store in stores)
     {
         <option value="@store.Id">@store.Name</option>
     }
 </select>
+
+@if (products is null) //пока не работает
+{
+    <p><em>Загрузка...</em></p>
+}
+else
+{
+    <ul>
+        @foreach (var p in products)
+        {
+            <li>@p.Name</li>
+        }
+    </ul>
+}
+
 @code {
     private int selectedStoreId = 0;
     private List<StoreDto> stores = new();
@@ -68,13 +83,13 @@
                 
                 // Загружаем все товары
                 products = await Http.GetFromJsonAsync<List<ProductDto>>(
-                    "http://localhost:5041/api/products");
+                    $"http://localhost:5041/api/stores/{selectedStoreId}/products");
                 
-                // Фильтруем товары по магазину
-                if (products != null)
-                {
-                    products = products.Where(p => p.StoreId == selectedStoreId).ToList();
-                }
+                // // Фильтруем товары по магазину
+                // if (products != null)
+                // {
+                //     products = products.Where(p => p.StoreId == selectedStoreId).ToList();
+                // }
             }
             catch (Exception ex)
             {

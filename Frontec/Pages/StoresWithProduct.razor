@@ -42,6 +42,10 @@ else
 
     async Task LoadStores(ChangeEventArgs e)
     {
-        stores = await Http.GetFromJsonAsync<List<StoreDto>>($"http://localhost:5041/api/products/{productId}/stores");
+        if (int.TryParse(e.Value?.ToString(), out int selectedId))
+        {
+            productId = selectedId;
+            stores = await Http.GetFromJsonAsync<List<StoreDto>>($"http://localhost:5041/api/products/{productId}/stores");
+        }
     }
 }
